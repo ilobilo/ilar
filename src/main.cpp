@@ -1,27 +1,14 @@
-#include <filesystem>
-#include <iostream>
-#include <fstream>
+#include <create.hpp>
 #include <cstring>
-
 #include <fs.hpp>
-namespace fs = std::filesystem;
-
-std::string filecontents(std::string path)
-{
-    std::ostringstream buf;
-    std::ifstream input(path.c_str(), std::ios::binary);
-    buf << input.rdbuf();
-    input.close();
-    return buf.str();
-}
 
 void usage()
 {
     std::cout << "Usage:" << std::endl;
-    std::cout << " read -- List files in image" << std::endl;
-    std::cout << "   Example: ilfs read myimage.ilfs" << std::endl;
-    std::cout << " write -- Create image from files" << std::endl;
-    std::cout << "   Example: ilfs write myimage.ilfs myfile.txt myfile2.txt" << std::endl;
+    std::cout << " list -- List files in image" << std::endl;
+    std::cout << "   Example: ilfs list myimage.ilfs" << std::endl;
+    std::cout << " create -- Create image from files" << std::endl;
+    std::cout << "   Example: ilfs create myimage.ilfs myfile.txt myfile2.txt" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -31,13 +18,15 @@ int main(int argc, char **argv)
         usage();
         return EINVAL;
     }
-    if (!std::strcmp(argv[1], "write"))
+    if (!std::strcmp(argv[1], "create"))
     {
         if (argc < 3)
         {
             usage();
             return EINVAL;
         }
+
+        std::remove(argv[2]);
         std::ofstream image(argv[2], std::ios::binary);
 
         for (int i = 3; i < argc; i++)
@@ -45,26 +34,18 @@ int main(int argc, char **argv)
             if (fs::exists(argv[i]) == false)
             {
                 std::cout << "File \"" << argv[i] << "\" does not exist!" << std::endl;
+                image.close();
+                std::remove(argv[2]);
                 return ENOENT;
             }
 
-            size_t size = fs::file_size(argv[i]);
-            std::string name = fs::path(argv[i]).filename();
-            std::string contents = filecontents(argv[i]);
-            if (contents.front() != '\0') size++;
-
-            fileheader file;
-            std::strncpy(file.magic, ILFS_MAGIC, 5);
-            std::strncpy(file.name, name.c_str(), NAME_LENGTH);
-            file.length = size;
-
-            image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
-            image.write(contents.c_str(), size);
+            fs::path filepath(argv[i]);
+            createfile("", filepath, image);
         }
 
         image.close();
     }
-    else if (!std::strcmp(argv[1], "read"))
+    else if (!std::strcmp(argv[1], "list"))
     {
         if (argc < 3)
         {
@@ -77,26 +58,34 @@ int main(int argc, char **argv)
             return ENOENT;
         }
 
-        std::string contents = filecontents(argv[2]);
+        std::string contents = filecontents(fs::path(argv[2]));
         size_t filelength = fs::file_size(argv[2]);
         fileheader *file = reinterpret_cast<fileheader*>(contents.data());
         size_t offset = 0;
 
         while (offset < filelength && !std::strcmp(file->magic, ILFS_MAGIC))
         {
-            std::cout << "Name: " << file->name << ", Size: " << file->length << std::endl;
-
-            offset += sizeof(fileheader);
-            std::cout << "Contents: " << std::endl << contents.data() + offset << std::endl;
-            offset += file->length;
-            if (offset < filelength && *(contents.data() + offset - 2) != '\n') std::cout << std::endl;
+            std::cout << "Name: " << file->name << ", Size: " << file->length << ", Type: ";
+            switch (file->type)
+            {
+                case ILFS_REGULAR:
+                    std::cout << "Regular" << std::endl;
+                    break;
+                case ILFS_DIRECTORY:
+                    std::cout << "Directory" << std::endl;
+                    break;
+                default:
+                    std::cout << "Unknown" << std::endl;
+                    break;
+            }
+            offset += sizeof(fileheader) + file->length;
 
             file = reinterpret_cast<fileheader*>(contents.data() + offset);
         }
     }
     else
     {
-        std::cout << "Unknown command line option " << argv[1] << std::endl;
+        std::cout << "Unknown command line option \"" << argv[1] << "\"" << std::endl;
         usage();
         return EINVAL;
     }

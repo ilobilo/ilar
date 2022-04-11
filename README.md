@@ -1,6 +1,13 @@
-# Shitty filesystem
+# ILFS
+## USTAR like read-only filesystem
 
-- [x] files
-- [ ] directories
-- [ ] permissions
-- [ ] links
+### TODO
+#### File types
+- [x] Regular
+- [x] Directory
+- [ ] Symlink
+
+#### Commands
+- [x] Create
+- [x] List
+- [ ] Extract
