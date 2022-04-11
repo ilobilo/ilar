@@ -1,4 +1,6 @@
-#include <create.hpp>
+#include <cmds/extract.hpp>
+#include <cmds/create.hpp>
+#include <cmds/list.hpp>
 #include <cstring>
 #include <fs.hpp>
 
@@ -8,7 +10,9 @@ void usage()
     std::cout << " list -- List files in image" << std::endl;
     std::cout << "   Example: ilfs list myimage.ilfs" << std::endl;
     std::cout << " create -- Create image from files" << std::endl;
-    std::cout << "   Example: ilfs create myimage.ilfs myfile.txt myfile2.txt" << std::endl;
+    std::cout << "   Example: ilfs create myimage.ilfs myfile.txt myfile2.txt mydir" << std::endl;
+    std::cout << " extract -- List files in image" << std::endl;
+    std::cout << "   Example: ilfs extract myimage.ilfs outdir" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -18,7 +22,28 @@ int main(int argc, char **argv)
         usage();
         return EINVAL;
     }
-    if (!std::strcmp(argv[1], "create"))
+
+    if (!std::strcmp(argv[1], "list"))
+    {
+        if (argc < 3)
+        {
+            usage();
+            return EINVAL;
+        }
+        if (fs::exists(argv[2]) == false)
+        {
+            std::cout << "File \"" << argv[2] << "\" does not exist!" << std::endl;
+            return ENOENT;
+        }
+        if (fs::is_regular_file(argv[2]) == false)
+        {
+            std::cout << "\"" << argv[2] << "\" is not a regular file!" << std::endl;
+            return EINVAL; // ENOTREG ?
+        }
+
+        listfiles(argv[2]);
+    }
+    else if (!std::strcmp(argv[1], "create"))
     {
         if (argc < 3)
         {
@@ -26,7 +51,7 @@ int main(int argc, char **argv)
             return EINVAL;
         }
 
-        std::remove(argv[2]);
+        fs::remove_all(argv[2]);
         std::ofstream image(argv[2], std::ios::binary);
 
         for (int i = 3; i < argc; i++)
@@ -45,43 +70,38 @@ int main(int argc, char **argv)
 
         image.close();
     }
-    else if (!std::strcmp(argv[1], "list"))
+    else if (!std::strcmp(argv[1], "extract"))
     {
         if (argc < 3)
         {
             usage();
             return EINVAL;
         }
+
         if (fs::exists(argv[2]) == false)
         {
             std::cout << "File \"" << argv[2] << "\" does not exist!" << std::endl;
             return ENOENT;
         }
 
-        std::string contents = filecontents(fs::path(argv[2]));
-        size_t filelength = fs::file_size(argv[2]);
-        fileheader *file = reinterpret_cast<fileheader*>(contents.data());
-        size_t offset = 0;
-
-        while (offset < filelength && !std::strcmp(file->magic, ILFS_MAGIC))
+        std::string dir;
+        if (argc < 4)
         {
-            std::cout << "Name: " << file->name << ", Size: " << file->length << ", Type: ";
-            switch (file->type)
+            dir = fs::current_path().string();
+            if (fs::exists(dir) == false)
             {
-                case ILFS_REGULAR:
-                    std::cout << "Regular" << std::endl;
-                    break;
-                case ILFS_DIRECTORY:
-                    std::cout << "Directory" << std::endl;
-                    break;
-                default:
-                    std::cout << "Unknown" << std::endl;
-                    break;
+                std::cout << "Directory \"" << dir << "\" does not exist!" << std::endl;
+                return ENOENT;
             }
-            offset += sizeof(fileheader) + file->length;
-
-            file = reinterpret_cast<fileheader*>(contents.data() + offset);
+            if (fs::is_directory(dir) == false)
+            {
+                std::cout << "\"" << dir << "\" is not a directory!" << std::endl;
+                return ENOTDIR;
+            }
         }
+        else dir = argv[3];
+
+        extract(argv[2], dir);
     }
     else
     {
