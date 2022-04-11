@@ -2,24 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-#include <vector>
 
 #include <fs.hpp>
-
-size_t filesize(std::string path)
-{
-    return std::filesystem::file_size(path);
-}
-
-std::string filename(std::string path)
-{
-    return std::filesystem::path(path).filename();
-}
-
-bool fileexists(std::string path)
-{
-    return std::filesystem::exists(path);
-}
+namespace fs = std::filesystem;
 
 std::string filecontents(std::string path)
 {
@@ -41,7 +26,12 @@ void usage()
 
 int main(int argc, char **argv)
 {
-    if (std::string(argv[1]) == "write")
+    if (argc < 2)
+    {
+        usage();
+        return EINVAL;
+    }
+    if (!std::strcmp(argv[1], "write"))
     {
         if (argc < 3)
         {
@@ -52,18 +42,19 @@ int main(int argc, char **argv)
 
         for (int i = 3; i < argc; i++)
         {
-            if (fileexists(argv[i]) == false)
+            if (fs::exists(argv[i]) == false)
             {
                 std::cout << "File \"" << argv[i] << "\" does not exist!" << std::endl;
                 return ENOENT;
             }
 
-            size_t size = filesize(argv[i]);
-            std::string name = filename(argv[i]);
+            size_t size = fs::file_size(argv[i]);
+            std::string name = fs::path(argv[i]).filename();
             std::string contents = filecontents(argv[i]);
             if (contents.front() != '\0') size++;
 
             fileheader file;
+            std::strncpy(file.magic, ILFS_MAGIC, 5);
             std::strncpy(file.name, name.c_str(), NAME_LENGTH);
             file.length = size;
 
@@ -73,32 +64,34 @@ int main(int argc, char **argv)
 
         image.close();
     }
-    else if (std::string(argv[1]) == "read")
+    else if (!std::strcmp(argv[1], "read"))
     {
         if (argc < 3)
         {
             usage();
             return EINVAL;
         }
-        if (fileexists(argv[2]) == false)
+        if (fs::exists(argv[2]) == false)
         {
             std::cout << "File \"" << argv[2] << "\" does not exist!" << std::endl;
             return ENOENT;
         }
 
         std::string contents = filecontents(argv[2]);
-        size_t filelength = filesize(argv[2]);
+        size_t filelength = fs::file_size(argv[2]);
+        fileheader *file = reinterpret_cast<fileheader*>(contents.data());
         size_t offset = 0;
 
-        while (offset < filelength)
+        while (offset < filelength && !std::strcmp(file->magic, ILFS_MAGIC))
         {
-            fileheader *file = reinterpret_cast<fileheader*>(contents.data() + offset);
             std::cout << "Name: " << file->name << ", Size: " << file->length << std::endl;
 
             offset += sizeof(fileheader);
             std::cout << "Contents: " << std::endl << contents.data() + offset << std::endl;
             offset += file->length;
-            if (offset < filelength) std::cout << std::endl;
+            if (offset < filelength && *(contents.data() + offset - 2) != '\n') std::cout << std::endl;
+
+            file = reinterpret_cast<fileheader*>(contents.data() + offset);
         }
     }
     else
