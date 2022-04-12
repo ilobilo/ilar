@@ -1,41 +1,52 @@
 #include <cmds/create.hpp>
+#include <header.hpp>
 #include <cstring>
-#include <fs.hpp>
+
 #include <sys/stat.h>
 
-void extract(std::string path, std::string dir)
+namespace cmds
 {
-    std::string contents = filecontents(path);
-    size_t filelength = fs::file_size(path);
-    fileheader *file = reinterpret_cast<fileheader*>(contents.data());
-    std::string fullpath;
-    size_t offset = 0;
-
-    while (offset < filelength && !std::strcmp(file->magic, ILFS_MAGIC))
+    void extract(std::string path, std::string dir)
     {
-        fullpath = dir + file->name;
-        fs::remove_all(fullpath);
+        std::string contents = filecontents(path);
+        fileheader *file = reinterpret_cast<fileheader*>(contents.data());
+        std::string fullpath;
+        size_t offset = 0;
 
-        switch (file->type)
+        while (true)
         {
-            case ILFS_REGULAR:
+            if (std::strcmp(file->signature, ILFS_SIGNATURE))
             {
-                std::ofstream newfile(fullpath, std::ios::binary);
-                newfile.write(contents.c_str() + offset + sizeof(fileheader), file->size);
-                newfile.close();
+                std::cout << "Error: File signature incorrect!" << std::endl;
                 break;
             }
-            case ILFS_DIRECTORY:
-                fs::create_directories(fullpath);
-                break;
-            case ILFS_SYMLINK:
-                // TODO
-                break;
+
+            fullpath = dir + file->name;
+            fs::remove_all(fullpath);
+
+            switch (file->type)
+            {
+                case ILFS_REGULAR:
+                {
+                    std::ofstream newfile(fullpath, std::ios::binary);
+                    newfile.write(contents.c_str() + offset + sizeof(fileheader), file->size);
+                    newfile.close();
+                    fs::permissions(fullpath, fs::perms(file->mode));
+                    break;
+                }
+                case ILFS_DIRECTORY:
+                    fs::create_directories(fullpath);
+                    fs::permissions(fullpath, fs::perms(file->mode));
+                    break;
+                case ILFS_SYMLINK:
+                    fs::create_symlink(file->link, fullpath);
+                    break;
+            }
+
+            offset += sizeof(fileheader) + file->size;
+            if (offset >= fs::file_size(path)) break;
+
+            file = reinterpret_cast<fileheader*>(contents.data() + offset);
         }
-
-        fs::permissions(fullpath, static_cast<fs::perms>(file->mode));
-
-        offset += sizeof(fileheader) + file->size;
-        file = reinterpret_cast<fileheader*>(contents.data() + offset);
     }
 }

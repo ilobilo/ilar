@@ -1,49 +1,59 @@
 #include <cmds/create.hpp>
+#include <header.hpp>
 #include <cstring>
-#include <fs.hpp>
 
-void listfiles(std::string path)
+namespace cmds
 {
-    std::string contents = filecontents(path);
-    size_t filelength = fs::file_size(path);
-    fileheader *file = reinterpret_cast<fileheader*>(contents.data());
-    size_t offset = 0;
-
-    while (offset < filelength && !std::strcmp(file->magic, ILFS_MAGIC))
+    void list(std::string path)
     {
-        std::cout << "Name: " << file->name << ", Size: " << file->size << std::endl;
+        std::string contents = filecontents(path);
+        fileheader *file = reinterpret_cast<fileheader*>(contents.data());
+        size_t offset = 0;
 
-        std::cout << "Mode: ";
-        switch (file->type)
+        while (true)
         {
-            case ILFS_DIRECTORY:
-                std::cout << "d";
+            if (std::strcmp(file->signature, ILFS_SIGNATURE))
+            {
+                std::cout << "Error: File signature incorrect!" << std::endl;
                 break;
-            case ILFS_SYMLINK:
-                std::cout << "l";
-                break;
-            default:
-                std::cout << "-";
-                break;
+            }
+
+            std::cout << "Name: " << file->name << std::endl;
+            if (file->type == ILFS_SYMLINK) std::cout << "Link: " << file->link << std::endl;
+            std::cout << "Size: " << file->size << std::endl;
+
+            std::cout << "Mode: ";
+            switch (file->type)
+            {
+                case ILFS_DIRECTORY:
+                    std::cout << "d";
+                    break;
+                case ILFS_SYMLINK:
+                    std::cout << "l";
+                    break;
+                default:
+                    std::cout << "-";
+                    break;
+            }
+
+            fs::perms perms(fs::perms(file->mode));
+
+            std::cout << ((perms & fs::perms::owner_read) != fs::perms::none ? "r" : "-")
+                << ((perms & fs::perms::owner_write) != fs::perms::none ? "w" : "-")
+                << ((perms & fs::perms::owner_exec) != fs::perms::none ? "x" : "-")
+                << ((perms & fs::perms::group_read) != fs::perms::none ? "r" : "-")
+                << ((perms & fs::perms::group_write) != fs::perms::none ? "w" : "-")
+                << ((perms & fs::perms::group_exec) != fs::perms::none ? "x" : "-")
+                << ((perms & fs::perms::others_read) != fs::perms::none ? "r" : "-")
+                << ((perms & fs::perms::others_write) != fs::perms::none ? "w" : "-")
+                << ((perms & fs::perms::others_exec) != fs::perms::none ? "x" : "-")
+                << std::endl;
+
+            offset += sizeof(fileheader) + file->size;
+            if (offset >= fs::file_size(path)) break;
+            else std::cout << std::endl;
+
+            file = reinterpret_cast<fileheader*>(contents.data() + offset);
         }
-
-        fs::perms perms(static_cast<fs::perms>(file->mode));
-
-        std::cout << ((perms & fs::perms::owner_read) != fs::perms::none ? "r" : "-")
-            << ((perms & fs::perms::owner_write) != fs::perms::none ? "w" : "-")
-            << ((perms & fs::perms::owner_exec) != fs::perms::none ? "x" : "-")
-            << ((perms & fs::perms::group_read) != fs::perms::none ? "r" : "-")
-            << ((perms & fs::perms::group_write) != fs::perms::none ? "w" : "-")
-            << ((perms & fs::perms::group_exec) != fs::perms::none ? "x" : "-")
-            << ((perms & fs::perms::others_read) != fs::perms::none ? "r" : "-")
-            << ((perms & fs::perms::others_write) != fs::perms::none ? "w" : "-")
-            << ((perms & fs::perms::others_exec) != fs::perms::none ? "x" : "-")
-            << std::endl;
-
-        offset += sizeof(fileheader) + file->size;
-        if (offset < filelength) std::cout << std::endl;
-        else break;
-
-        file = reinterpret_cast<fileheader*>(contents.data() + offset);
     }
 }

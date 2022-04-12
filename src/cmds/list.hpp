@@ -2,4 +2,7 @@
 
 #include <iostream>
 
-void listfiles(std::string path);
+namespace cmds
+{
+    void list(std::string path);
+}

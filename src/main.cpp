@@ -1,8 +1,9 @@
 #include <cmds/extract.hpp>
 #include <cmds/create.hpp>
 #include <cmds/list.hpp>
+#include <header.hpp>
 #include <cstring>
-#include <fs.hpp>
+#include <cerrno>
 
 void usage()
 {
@@ -20,7 +21,8 @@ int main(int argc, char **argv)
     if (argc < 2)
     {
         usage();
-        return EINVAL;
+        errno = EINVAL;
+        return EXIT_FAILURE;
     }
 
     if (!std::strcmp(argv[1], "list"))
@@ -28,27 +30,31 @@ int main(int argc, char **argv)
         if (argc < 3)
         {
             usage();
-            return EINVAL;
+            errno = EINVAL;
+            return EXIT_FAILURE;
         }
         if (fs::exists(argv[2]) == false)
         {
             std::cout << "File \"" << argv[2] << "\" does not exist!" << std::endl;
-            return ENOENT;
+            errno = ENOENT;
+            return EXIT_FAILURE;
         }
         if (fs::is_regular_file(argv[2]) == false)
         {
             std::cout << "\"" << argv[2] << "\" is not a regular file!" << std::endl;
-            return EINVAL; // ENOTREG ?
+            errno = EINVAL;
+            return EXIT_FAILURE; // ENOTREG ?
         }
 
-        listfiles(argv[2]);
+        cmds::list(argv[2]);
     }
     else if (!std::strcmp(argv[1], "create"))
     {
         if (argc < 3)
         {
             usage();
-            return EINVAL;
+            errno = EINVAL;
+            return EXIT_FAILURE;
         }
 
         fs::remove_all(argv[2]);
@@ -61,11 +67,12 @@ int main(int argc, char **argv)
                 std::cout << "File \"" << argv[i] << "\" does not exist!" << std::endl;
                 image.close();
                 std::remove(argv[2]);
-                return ENOENT;
+                errno = ENOENT;
+                return EXIT_FAILURE;
             }
 
-            fs::path filepath(argv[i]);
-            createfile("", filepath, image);
+            fs::path path(argv[i]);
+            cmds::create("", path, image);
         }
 
         image.close();
@@ -75,39 +82,44 @@ int main(int argc, char **argv)
         if (argc < 3)
         {
             usage();
-            return EINVAL;
+            errno = EINVAL;
+            return EXIT_FAILURE;
         }
 
         if (fs::exists(argv[2]) == false)
         {
             std::cout << "File \"" << argv[2] << "\" does not exist!" << std::endl;
-            return ENOENT;
+            errno = ENOENT;
+            return EXIT_FAILURE;
         }
 
         std::string dir;
-        if (argc < 4)
+        if (argc < 4) dir = fs::current_path().string();
+        else
         {
-            dir = fs::current_path().string();
+            dir = argv[3];
             if (fs::exists(dir) == false)
             {
                 std::cout << "Directory \"" << dir << "\" does not exist!" << std::endl;
-                return ENOENT;
+                errno = ENOENT;
+                return EXIT_FAILURE;
             }
             if (fs::is_directory(dir) == false)
             {
                 std::cout << "\"" << dir << "\" is not a directory!" << std::endl;
-                return ENOTDIR;
+                errno = ENOTDIR;
+                return EXIT_FAILURE;
             }
         }
-        else dir = argv[3];
 
-        extract(argv[2], dir);
+        cmds::extract(argv[2], dir);
     }
     else
     {
         std::cout << "Unknown command line option \"" << argv[1] << "\"" << std::endl;
         usage();
-        return EINVAL;
+        errno = EINVAL;
+        return EXIT_FAILURE;
     }
 
     return 0;

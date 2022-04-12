@@ -2,4 +2,7 @@
 
 #include <iostream>
 
-void extract(std::string path, std::string dir);
+namespace cmds
+{
+    void extract(std::string path, std::string dir);
+}

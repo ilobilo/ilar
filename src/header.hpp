@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
-static constexpr size_t NAME_LENGTH = 64;
-static constexpr char ILFS_MAGIC[] = "ILFS";
+static constexpr size_t PATH_LENGTH = 128;
+static constexpr char ILFS_SIGNATURE[] = "ILFS";
 
 enum filetypes
 {
@@ -15,8 +15,9 @@ enum filetypes
 
 struct fileheader
 {
-    char magic[5];
-    char name[NAME_LENGTH];
+    char signature[5];
+    char name[PATH_LENGTH];
+    char link[PATH_LENGTH];
     uint64_t size;
     uint8_t type;
     uint32_t mode;
