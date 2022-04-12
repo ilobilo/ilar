@@ -9,11 +9,11 @@ void usage()
 {
     std::cout << "Usage:" << std::endl;
     std::cout << " list -- List files in image" << std::endl;
-    std::cout << "   Example: ilfs list myimage.ilfs" << std::endl;
+    std::cout << "   Example: ilar list myimage.ilar" << std::endl;
     std::cout << " create -- Create image from files" << std::endl;
-    std::cout << "   Example: ilfs create myimage.ilfs myfile.txt myfile2.txt mydir" << std::endl;
+    std::cout << "   Example: ilar create myimage.ilar myfile.txt myfile2.txt mydir" << std::endl;
     std::cout << " extract -- List files in image" << std::endl;
-    std::cout << "   Example: ilfs extract myimage.ilfs outdir" << std::endl;
+    std::cout << "   Example: ilar extract myimage.ilar outdir" << std::endl;
 }
 
 int main(int argc, char **argv)

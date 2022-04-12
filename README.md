@@ -1,13 +1,58 @@
-# ILFS
-## USTAR like read-only filesystem
+# ILAR
+## Simple archive format
 
 ### TODO
-- [x] Regular
-- [x] Directory
-- [ ] Symlink
-- [x] Create
-- [x] List
-- [x] Extract
-- [x] File mode
-- [ ] GID and UID
-- [ ] Time
+- [x] Regular files
+- [x] Directories
+- [x] Symlinks
+- [x] File modes
+- [x] Create image
+- [x] List files in image
+- [x] Extract files from image
+
+### Dependencies to build
+* clang++
+* make
+* Linux or WSL
+
+### Building and usage
+* Compile the code with ```make```. Executable will be available in bin/ folder
+* Create ILAR archive:
+```
+bin/ilar create myarchive.ilar myfile.txt mydir mysymlink.pdf
+```
+* Extract ILAR archive:
+```
+bin/ilar extract myarchive.ilar myoutdir/
+```
+* List files in ILAR archive:
+```
+bin/ilar list myarchive.ilar
+```
+
+### Specifications
+ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ```sizeof(fileheader)``` (0x118 bytes) to header offset. To get next file header, add another ```file->size``` bytes
+```
+1st file header -> 1st file contents -> 2nd file header -> 2nd file contents
+```
+File header structure:
+```c
+struct fileheader
+{
+    char signature[5]; // Always should be "ILAR"
+    char name[PATH_LENGTH]; // File name with full path
+    char link[PATH_LENGTH]; // Contains relative path to symlinked file
+    uint64_t size; // Size of file contents in bytes
+    uint8_t type; // File type
+    uint32_t mode; // File modes
+};
+```
+File types:
+```c
+enum filetypes
+{
+    ILAR_REGULAR = 0,
+    ILAR_DIRECTORY = 1,
+    ILAR_SYMLINK = 2
+};
+```

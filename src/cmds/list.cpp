@@ -12,27 +12,29 @@ namespace cmds
 
         while (true)
         {
-            if (std::strcmp(file->signature, ILFS_SIGNATURE))
+            if (std::strcmp(file->signature, ILAR_SIGNATURE))
             {
                 std::cout << "Error: File signature incorrect!" << std::endl;
                 break;
             }
 
             std::cout << "Name: " << file->name << std::endl;
-            if (file->type == ILFS_SYMLINK) std::cout << "Link: " << file->link << std::endl;
+            if (file->type == ILAR_SYMLINK) std::cout << "Link: " << file->link << std::endl;
             std::cout << "Size: " << file->size << std::endl;
 
-            std::cout << "Mode: ";
             switch (file->type)
             {
-                case ILFS_DIRECTORY:
-                    std::cout << "d";
+                case ILAR_REGULAR:
+                    std::cout << "Type: Regular" << std::endl << "Mode: -";
                     break;
-                case ILFS_SYMLINK:
-                    std::cout << "l";
+                case ILAR_DIRECTORY:
+                    std::cout << "Type: Directory" << std::endl << "Mode: d";
+                    break;
+                case ILAR_SYMLINK:
+                    std::cout << "Type: Symlink" << std::endl << "Mode: l";
                     break;
                 default:
-                    std::cout << "-";
+                    std::cout << "Type: Unknown" << std::endl << "Mode: -";
                     break;
             }
 

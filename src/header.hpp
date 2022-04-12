@@ -4,13 +4,13 @@
 #include <cstdint>
 
 static constexpr size_t PATH_LENGTH = 128;
-static constexpr char ILFS_SIGNATURE[] = "ILFS";
+static constexpr char ILAR_SIGNATURE[] = "ILAR";
 
 enum filetypes
 {
-    ILFS_REGULAR,
-    ILFS_DIRECTORY,
-    ILFS_SYMLINK
+    ILAR_REGULAR = 0,
+    ILAR_DIRECTORY = 1,
+    ILAR_SYMLINK = 2
 };
 
 struct fileheader

@@ -1,7 +1,7 @@
 CPP := clang++
 
 SRCDIR := src
-TARGET := bin/ilfs
+TARGET := bin/ilar
 
 CPPFILES := $(shell find $(SRCDIR) -type f -name *.cpp)
 OBJECTS := $(CPPFILES:.cpp=.o)

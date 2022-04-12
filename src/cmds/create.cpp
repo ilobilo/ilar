@@ -29,11 +29,11 @@ namespace cmds
         std::string contents = filecontents(path);
 
         fileheader file;
-        std::strncpy(file.signature, ILFS_SIGNATURE, 5);
+        std::strncpy(file.signature, ILAR_SIGNATURE, 5);
         std::strncpy(file.name, name.c_str(), PATH_LENGTH);
 
         file.size = size;
-        file.type = ILFS_REGULAR;
+        file.type = ILAR_REGULAR;
         file.mode = static_cast<uint32_t>(fs::status(path).permissions());
 
         image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
@@ -45,12 +45,12 @@ namespace cmds
         std::string name = parent + "/" + path.filename().string();
 
         fileheader file;
-        std::strncpy(file.signature, ILFS_SIGNATURE, 5);
+        std::strncpy(file.signature, ILAR_SIGNATURE, 5);
         std::strncpy(file.name, name.c_str(), PATH_LENGTH);
         std::strncpy(file.link, fs::read_symlink(path).c_str(), PATH_LENGTH);
 
         file.size = 0;
-        file.type = ILFS_SYMLINK;
+        file.type = ILAR_SYMLINK;
         file.mode = 0777;
 
         image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
@@ -61,11 +61,11 @@ namespace cmds
         std::string name = parent + "/" + path.filename().string();
 
         fileheader file;
-        std::strncpy(file.signature, ILFS_SIGNATURE, 5);
+        std::strncpy(file.signature, ILAR_SIGNATURE, 5);
         std::strncpy(file.name, name.c_str(), PATH_LENGTH);
 
         file.size = 0;
-        file.type = ILFS_DIRECTORY;
+        file.type = ILAR_DIRECTORY;
         file.mode = static_cast<uint32_t>(fs::status(path).permissions());
 
         image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));

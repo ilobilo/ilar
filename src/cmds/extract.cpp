@@ -15,7 +15,7 @@ namespace cmds
 
         while (true)
         {
-            if (std::strcmp(file->signature, ILFS_SIGNATURE))
+            if (std::strcmp(file->signature, ILAR_SIGNATURE))
             {
                 std::cout << "Error: File signature incorrect!" << std::endl;
                 break;
@@ -26,7 +26,7 @@ namespace cmds
 
             switch (file->type)
             {
-                case ILFS_REGULAR:
+                case ILAR_REGULAR:
                 {
                     std::ofstream newfile(fullpath, std::ios::binary);
                     newfile.write(contents.c_str() + offset + sizeof(fileheader), file->size);
@@ -34,11 +34,11 @@ namespace cmds
                     fs::permissions(fullpath, fs::perms(file->mode));
                     break;
                 }
-                case ILFS_DIRECTORY:
+                case ILAR_DIRECTORY:
                     fs::create_directories(fullpath);
                     fs::permissions(fullpath, fs::perms(file->mode));
                     break;
-                case ILFS_SYMLINK:
+                case ILAR_SYMLINK:
                     fs::create_symlink(file->link, fullpath);
                     break;
             }
