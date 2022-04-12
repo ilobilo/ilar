@@ -37,9 +37,12 @@ ILAR archive consists of chainloaded file headers and contents. First file heade
 ```
 File header structure:
 ```c
+#define PATH_LENGTH 128
+#define ILAR_SIGNATURE "ILAR"
+
 struct fileheader
 {
-    char signature[5]; // Always should be "ILAR"
+    char signature[5]; // Should be ILAR_SIGNATURE
     char name[PATH_LENGTH]; // File name with full path
     char link[PATH_LENGTH]; // Contains relative path to symlinked file
     uint64_t size; // Size of file contents in bytes
