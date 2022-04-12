@@ -31,7 +31,7 @@ bin/ilar list myarchive.ilar
 ```
 
 ### Specifications
-ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ```sizeof(fileheader)``` (0x118 bytes) to header offset. To get next file header, add another ```file->size``` bytes
+ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ```sizeof(fileheader)``` (0x112 or 274 bytes) to header offset. To get next file header, add another ```file->size``` bytes
 ```
 1st file header -> 1st file contents -> 2nd file header -> 2nd file contents
 ```
@@ -45,7 +45,7 @@ struct fileheader
     uint64_t size; // Size of file contents in bytes
     uint8_t type; // File type
     uint32_t mode; // File modes
-};
+} __attribute__((packed));
 ```
 File types:
 ```c

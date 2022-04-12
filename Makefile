@@ -1,11 +1,11 @@
-CPP := clang++
+CPP = clang++
+CPPFLAGS = -I$(SRCDIR) -std=gnu++20 -Wall -Werror -Wextra
 
-SRCDIR := src
-TARGET := bin/ilar
+SRCDIR := source
+TARGET = bin/ilar
 
 CPPFILES := $(shell find $(SRCDIR) -type f -name *.cpp)
 OBJECTS := $(CPPFILES:.cpp=.o)
-CPPFLAGS := -I$(SRCDIR) -std=gnu++20 -Wall -Werror -Wextra
 
 $(TARGET): $(OBJECTS)
 	$(CPP) $^ -o $(TARGET)

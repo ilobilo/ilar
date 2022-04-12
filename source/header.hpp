@@ -21,4 +21,4 @@ struct fileheader
     uint64_t size;
     uint8_t type;
     uint32_t mode;
-};
+} __attribute__((packed));
