@@ -1,18 +1,11 @@
+// Copyright (C) 2022  ilobilo
+
 #include <cmds/create.hpp>
 #include <header.hpp>
 #include <cstring>
 
 namespace cmds
 {
-    std::string filecontents(fs::path path)
-    {
-        std::ostringstream buf;
-        std::ifstream input(path, std::ios::binary);
-        buf << input.rdbuf();
-        input.close();
-        return buf.str();
-    }
-
     std::string filecontents(std::string path)
     {
         std::ostringstream buf;
@@ -22,7 +15,7 @@ namespace cmds
         return buf.str();
     }
 
-    void createfile(std::string parent, fs::path path, std::ofstream &image)
+    void createfile(std::string parent, fs::path path, std::stringstream &image)
     {
         size_t size = fs::file_size(path);
         std::string name = parent + "/" + path.filename().string();
@@ -40,7 +33,7 @@ namespace cmds
         image.write(contents.c_str(), size);
     }
 
-    void createsymlink(std::string parent, fs::path path, std::ofstream &image)
+    void createsymlink(std::string parent, fs::path path, std::stringstream &image)
     {
         std::string name = parent + "/" + path.filename().string();
 
@@ -56,7 +49,7 @@ namespace cmds
         image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
     }
 
-    void createdir(std::string parent, fs::path path, std::ofstream &image)
+    void createdir(std::string parent, fs::path path, std::stringstream &image)
     {
         std::string name = parent + "/" + path.filename().string();
 
@@ -76,7 +69,7 @@ namespace cmds
         }
     }
 
-    void create(std::string parent, fs::path path, std::ofstream &image)
+    void create(std::string parent, fs::path path, std::stringstream &image)
     {
         switch (fs::symlink_status(path).type())
         {

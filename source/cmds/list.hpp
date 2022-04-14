@@ -1,8 +1,10 @@
+// Copyright (C) 2022  ilobilo
+
 #pragma once
 
 #include <iostream>
 
 namespace cmds
 {
-    void list(std::string path);
+    void list(std::stringstream &data);
 }

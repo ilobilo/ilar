@@ -1,5 +1,9 @@
+// Copyright (C) 2022  ilobilo
+
+#include <tools/compress.hpp>
 #include <cmds/extract.hpp>
 #include <cmds/create.hpp>
+#include <tools/misc.hpp>
 #include <cmds/list.hpp>
 #include <header.hpp>
 #include <cstring>
@@ -12,6 +16,7 @@ void usage()
     std::cout << "   Example: ilar list myimage.ilar" << std::endl;
     std::cout << " create -- Create image from files" << std::endl;
     std::cout << "   Example: ilar create myimage.ilar myfile.txt myfile2.txt mydir" << std::endl;
+    std::cout << "   To use compression, add .gz, .xz or .bz2 to image file name" << std::endl;
     std::cout << " extract -- List files in image" << std::endl;
     std::cout << "   Example: ilar extract myimage.ilar outdir" << std::endl;
 }
@@ -46,7 +51,11 @@ int main(int argc, char **argv)
             return EXIT_FAILURE; // ENOTREG ?
         }
 
-        cmds::list(argv[2]);
+        std::stringstream strstream;
+        file2strstream(argv[2], strstream);
+
+        decompress(strstream);
+        cmds::list(strstream);
     }
     else if (!std::strcmp(argv[1], "create"))
     {
@@ -57,25 +66,35 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-        fs::remove_all(argv[2]);
-        std::ofstream image(argv[2], std::ios::binary);
-
+        std::stringstream strstream;
         for (int i = 3; i < argc; i++)
         {
             if (fs::exists(argv[i]) == false)
             {
                 std::cout << "File \"" << argv[i] << "\" does not exist!" << std::endl;
-                image.close();
                 std::remove(argv[2]);
                 errno = ENOENT;
                 return EXIT_FAILURE;
             }
 
-            fs::path path(argv[i]);
-            cmds::create("", path, image);
+            std::string pathstr(argv[i]);
+            if (pathstr.back() == '/') pathstr.pop_back();
+
+            fs::path path(pathstr);
+            cmds::create("", path, strstream);
         }
 
-        image.close();
+        comp_type comp = comp_type::NONE;
+        fs::path path(argv[2]);
+
+        if (path.extension() == ".gz") comp = comp_type::GZIP;
+        else if (path.extension() == ".bz2") comp = comp_type::BZIP2;
+        else if (path.extension() == ".xz") comp = comp_type::LZMA;
+
+        compress(strstream, comp);
+
+        fs::remove_all(argv[2]);
+        strstream2ofstream(strstream, argv[2]);
     }
     else if (!std::strcmp(argv[1], "extract"))
     {
@@ -112,7 +131,11 @@ int main(int argc, char **argv)
             }
         }
 
-        cmds::extract(argv[2], dir);
+        std::stringstream strstream;
+        file2strstream(argv[2], strstream);
+
+        decompress(strstream);
+        cmds::extract(strstream, dir);
     }
     else
     {

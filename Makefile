@@ -1,23 +1,14 @@
-CPP = clang++
-CPPFLAGS = -I$(SRCDIR) -std=gnu++20 -Wall -Werror -Wextra
+ROOTDIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+SOURCEDIR := $(ROOTDIR)/source/
 
-SRCDIR := source
-TARGET = bin/ilar
-
-CPPFILES := $(shell find $(SRCDIR) -type f -name *.cpp)
-OBJECTS := $(CPPFILES:.cpp=.o)
-
-$(TARGET): $(OBJECTS)
-	$(CPP) $^ -o $(TARGET)
-	rm -rf $(OBJECTS)
-
-%.o: %.cpp
-	$(CPP) $(CPPFLAGS) -c -o $@ $<
+.PHONY: all
+all:
+	$(MAKE) -C $(ROOTDIR)/source
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJECTS)
+	$(MAKE) -C $(ROOTDIR)/source clean
 
 .PHONY: distclean
 distclean:
-	rm -rf $(TARGET) $(OBJECTS)
+	$(MAKE) -C $(ROOTDIR)/source distclean

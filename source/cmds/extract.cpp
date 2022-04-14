@@ -1,52 +1,56 @@
+// Copyright (C) 2022  ilobilo
+
 #include <cmds/create.hpp>
+#include <tools/misc.hpp>
 #include <header.hpp>
 #include <cstring>
 
-#include <sys/stat.h>
-
 namespace cmds
 {
-    void extract(std::string path, std::string dir)
+    void extract(std::stringstream &data, std::string dir)
     {
-        std::string contents = filecontents(path);
-        fileheader *file = reinterpret_cast<fileheader*>(contents.data());
+        data.seekp(0, std::ios::end);
+        size_t size = data.tellp();
+        data.seekp(0, std::ios::beg);
+
         std::string fullpath;
         size_t offset = 0;
 
+        fileheader file;
+        data.read(reinterpret_cast<char*>(&file), sizeof(fileheader));
+
         while (true)
         {
-            if (std::strcmp(file->signature, ILAR_SIGNATURE))
+            if (std::strcmp(file.signature, ILAR_SIGNATURE))
             {
                 std::cout << "Error: File signature incorrect!" << std::endl;
                 break;
             }
 
-            fullpath = dir + file->name;
+            fullpath = dir + file.name;
             fs::remove_all(fullpath);
 
-            switch (file->type)
+            switch (file.type)
             {
                 case ILAR_REGULAR:
                 {
-                    std::ofstream newfile(fullpath, std::ios::binary);
-                    newfile.write(contents.c_str() + offset + sizeof(fileheader), file->size);
-                    newfile.close();
-                    fs::permissions(fullpath, fs::perms(file->mode));
+                    strstream2ofstream(data, fullpath, file.size);
+                    fs::permissions(fullpath, fs::perms(file.mode));
                     break;
                 }
                 case ILAR_DIRECTORY:
                     fs::create_directories(fullpath);
-                    fs::permissions(fullpath, fs::perms(file->mode));
+                    fs::permissions(fullpath, fs::perms(file.mode));
                     break;
                 case ILAR_SYMLINK:
-                    fs::create_symlink(file->link, fullpath);
+                    fs::create_symlink(file.link, fullpath);
                     break;
             }
 
-            offset += sizeof(fileheader) + file->size;
-            if (offset >= fs::file_size(path)) break;
+            offset += sizeof(fileheader) + file.size;
+            if (offset >= size) break;
 
-            file = reinterpret_cast<fileheader*>(contents.data() + offset);
+            data.read(reinterpret_cast<char*>(&file), sizeof(fileheader));
         }
     }
 }

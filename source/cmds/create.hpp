@@ -1,3 +1,5 @@
+// Copyright (C) 2022  ilobilo
+
 #pragma once
 
 #include <filesystem>
@@ -8,11 +10,10 @@ namespace fs = std::filesystem;
 
 namespace cmds
 {
-    std::string filecontents(fs::path path);
     std::string filecontents(std::string path);
 
-    void createfile(std::string parent, fs::path path, std::ofstream &image);
-    void createsymlink(std::string parent, fs::path path, std::ofstream &image);
-    void createdir(std::string parent, fs::path path, std::ofstream &image);
-    void create(std::string parent, fs::path path, std::ofstream &image);
+    void createfile(std::string parent, fs::path path, std::stringstream &image);
+    void createsymlink(std::string parent, fs::path path, std::stringstream &image);
+    void createdir(std::string parent, fs::path path, std::stringstream &image);
+    void create(std::string parent, fs::path path, std::stringstream &image);
 }

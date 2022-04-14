@@ -9,10 +9,12 @@
 - [x] Create image
 - [x] List files in image
 - [x] Extract files from image
+- [x] GZIP, BZIP2 and LZMA support
 
 ### Dependencies to build
-* clang++
-* make
+* Clang++
+* Make
+* Boost iostreams (libboost-iostreams-dev on debian based distros)
 * Linux or WSL
 
 ### Building and usage
