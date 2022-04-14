@@ -16,7 +16,7 @@ void usage()
     std::cout << "   Example: ilar list myimage.ilar" << std::endl;
     std::cout << " create -- Create image from files" << std::endl;
     std::cout << "   Example: ilar create myimage.ilar myfile.txt myfile2.txt mydir" << std::endl;
-    std::cout << "   To use compression, add .gz, .xz or .bz2 to image file name" << std::endl;
+    std::cout << "   To use compression add .gz, .xz or .bz2 to archive file name" << std::endl;
     std::cout << " extract -- List files in image" << std::endl;
     std::cout << "   Example: ilar extract myimage.ilar outdir" << std::endl;
 }
