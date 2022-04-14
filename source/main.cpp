@@ -137,6 +137,7 @@ int main(int argc, char **argv)
         decompress(strstream);
         cmds::extract(strstream, dir);
     }
+    else if (!std::strcmp(argv[1], "help")) usage();
     else
     {
         std::cout << "Unknown command line option \"" << argv[1] << "\"" << std::endl;
@@ -145,5 +146,5 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

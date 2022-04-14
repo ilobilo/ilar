@@ -12,7 +12,7 @@
 - [x] GZIP, BZIP2 and LZMA support
 
 ### Dependencies to build
-* Clang++
+* Clang++ (For custom compiler specify CPP=compiler when running make)
 * Make
 * Boost iostreams (libboost-iostreams-dev on debian based distros)
 * Linux or WSL

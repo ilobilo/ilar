@@ -1,7 +1,7 @@
 SOURCEDIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BINDIR := $(SOURCEDIR)/../bin/
 
-CPP := clang++
+CPP = clang++
 TARGET = $(BINDIR)/ilar
 
 CPPFILES := $(shell find $(SOURCEDIR)/ -type f -name '*.cpp')
