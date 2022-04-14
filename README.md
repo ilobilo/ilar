@@ -23,6 +23,7 @@
 ```
 bin/ilar create myarchive.ilar myfile.txt mydir mysymlink.pdf
 ```
+* To use compression add .gz, .bz2 or .xz to archive file name
 * Extract ILAR archive:
 ```
 bin/ilar extract myarchive.ilar myoutdir/
@@ -30,6 +31,10 @@ bin/ilar extract myarchive.ilar myoutdir/
 * List files in ILAR archive:
 ```
 bin/ilar list myarchive.ilar
+```
+* Show help
+```
+bin/ilar help
 ```
 
 ### Specifications
