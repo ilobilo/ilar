@@ -5,6 +5,10 @@ SOURCEDIR := $(ROOTDIR)/source/
 all:
 	$(MAKE) -C $(ROOTDIR)/source
 
+.PHONY: install
+install: all
+	$(MAKE) -C $(ROOTDIR)/source install
+
 .PHONY: clean
 clean:
 	$(MAKE) -C $(ROOTDIR)/source clean

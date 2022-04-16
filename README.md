@@ -19,6 +19,8 @@
 
 ### Building and usage
 * Compile the code with ```make```. Executable will be available in bin/ folder
+* To install executable in /usr/local/bin, run ```sudo make install```
+* You can set destination with DESTDIR variable
 * Create ILAR archive:
 ```
 bin/ilar create myarchive.ilar myfile.txt mydir mysymlink.pdf

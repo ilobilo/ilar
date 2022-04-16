@@ -3,6 +3,7 @@ BINDIR := $(SOURCEDIR)/../bin/
 
 CPP = clang++
 TARGET = $(BINDIR)/ilar
+DESTDIR = /usr/local/bin/
 
 CPPFILES := $(shell find $(SOURCEDIR)/ -type f -name '*.cpp')
 OBJECTS := $(CPPFILES:.cpp=.o)
@@ -19,6 +20,10 @@ $(TARGET): $(OBJECTS)
 
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) -c -o $@ $<
+
+.PHONY: install
+install:
+	cp $(TARGET) $(DESTDIR)
 
 .PHONY: clean
 clean:
