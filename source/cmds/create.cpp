@@ -15,7 +15,7 @@ namespace cmds
         return buf.str();
     }
 
-    void createfile(std::string parent, fs::path path, std::stringstream &image)
+    void createfile(std::string parent, fs::path path, std::stringstream &archive)
     {
         size_t size = fs::file_size(path);
         std::string name = parent + "/" + path.filename().string();
@@ -29,11 +29,11 @@ namespace cmds
         file.type = ILAR_REGULAR;
         file.mode = static_cast<uint32_t>(fs::status(path).permissions());
 
-        image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
-        image.write(contents.c_str(), size);
+        archive.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
+        archive.write(contents.c_str(), size);
     }
 
-    void createsymlink(std::string parent, fs::path path, std::stringstream &image)
+    void createsymlink(std::string parent, fs::path path, std::stringstream &archive)
     {
         std::string name = parent + "/" + path.filename().string();
 
@@ -46,10 +46,10 @@ namespace cmds
         file.type = ILAR_SYMLINK;
         file.mode = 0777;
 
-        image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
+        archive.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
     }
 
-    void createdir(std::string parent, fs::path path, std::stringstream &image)
+    void createdir(std::string parent, fs::path path, std::stringstream &archive)
     {
         std::string name = parent + "/" + path.filename().string();
 
@@ -61,26 +61,26 @@ namespace cmds
         file.type = ILAR_DIRECTORY;
         file.mode = static_cast<uint32_t>(fs::status(path).permissions());
 
-        image.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
+        archive.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
 
         for (const auto &entry : fs::directory_iterator(path))
         {
-            create(parent + "/" + path.filename().string(), entry, image);
+            create(parent + "/" + path.filename().string(), entry, archive);
         }
     }
 
-    void create(std::string parent, fs::path path, std::stringstream &image)
+    void create(std::string parent, fs::path path, std::stringstream &archive)
     {
         switch (fs::symlink_status(path).type())
         {
             case fs::file_type::regular:
-                createfile(parent, path, image);
+                createfile(parent, path, archive);
                 break;
             case fs::file_type::directory:
-                createdir(parent, path, image);
+                createdir(parent, path, archive);
                 break;
             case fs::file_type::symlink:
-                createsymlink(parent, path, image);
+                createsymlink(parent, path, archive);
                 break;
             default:
                 std::cout << path.c_str() << ": Unknown file type!" << std::endl;

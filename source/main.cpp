@@ -69,15 +69,16 @@ int main(int argc, char **argv)
         std::stringstream strstream;
         for (int i = 3; i < argc; i++)
         {
-            if (fs::exists(argv[i]) == false)
+            std::string pathstr(argv[i]);
+
+            if (fs::exists(pathstr) == false)
             {
-                std::cout << "File \"" << argv[i] << "\" does not exist!" << std::endl;
-                std::remove(argv[2]);
+                std::cout << "File \"" << pathstr << "\" does not exist!" << std::endl;
+                std::remove(argv[i]);
                 errno = ENOENT;
                 return EXIT_FAILURE;
             }
 
-            std::string pathstr(argv[i]);
             if (pathstr.back() == '/') pathstr.pop_back();
 
             fs::path path(pathstr);
