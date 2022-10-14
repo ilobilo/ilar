@@ -1,1 +1,4 @@
 .vscode
+builddir
+subprojects/*
+!subprojects/conflict.wrap

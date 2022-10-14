@@ -1,7 +1,6 @@
 // Copyright (C) 2022  ilobilo
 
 #include <cmds/create.hpp>
-#include <tools/misc.hpp>
 #include <header.hpp>
 #include <cstring>
 
@@ -34,7 +33,14 @@ namespace cmds
             {
                 case ILAR_REGULAR:
                 {
-                    strstream2ofstream(data, fullpath, file.size);
+                    std::ofstream out(fullpath, std::ios::binary);
+                    auto buffer = new char[file.size];
+
+                    data.read(buffer, file.size);
+                    out.write(buffer, file.size);
+
+                    delete[] buffer;
+
                     fs::permissions(fullpath, fs::perms(file.mode));
                     break;
                 }
@@ -48,7 +54,8 @@ namespace cmds
             }
 
             offset += sizeof(fileheader) + file.size;
-            if (offset >= size) break;
+            if (offset >= size)
+                break;
 
             data.read(reinterpret_cast<char*>(&file), sizeof(fileheader));
         }

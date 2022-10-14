@@ -1,7 +1,7 @@
 # ILAR
-## Simple archive format
+Simple archive format
 
-### TODO
+### Supports
 - [x] Regular files
 - [x] Directories
 - [x] Symlinks
@@ -12,35 +12,38 @@
 - [x] GZIP, BZIP2 and LZMA support
 
 ### Dependencies to build
-* Clang++ (For custom compiler specify CPP=compiler when running make)
-* Make
+* Meson
+* Ninja
+* C++ compiler
 * Boost iostreams (libboost-iostreams-dev on debian based distros)
-* Linux or WSL
 
-### Building and usage
-* Compile the code with ```make```. Executable will be available in bin/ folder
-* To install executable in /usr/local/bin, run ```sudo make install```
-* You can set destination with DESTDIR variable
-* Create ILAR archive:
+### Building and running
+* ``meson builddir``
+* ``ninja -C builddir``
+* Create ILAR archive: (To use compression, add .gz, .bz2 or .xz to file name or use -t/--type. Possible values are gz, bz2 and xz)
 ```
-bin/ilar create myarchive.ilar myfile.txt mydir mysymlink.pdf
+./builddir/ilar -c/--create -t/--type {gz|bz2|xz} -f/--file myarchive.ilar.ext myfile.txt mydir mysymlink.pdf
 ```
-* To use compression add .gz, .bz2 or .xz to archive file name
 * Extract ILAR archive:
 ```
-bin/ilar extract myarchive.ilar myoutdir/
+./builddir/ilar -x/--extract -f/--file myarchive.ilar -d/--directory myoutdir/
 ```
 * List files in ILAR archive:
 ```
-bin/ilar list myarchive.ilar
+./builddir/ilar -l/--list -f/--file myarchive.ilar
 ```
 * Show help
 ```
-bin/ilar help
+./builddir/ilar -h/--help
+```
+* Show version
+```
+./builddir/ilar -v/--version
 ```
 
 ### Specifications
-ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ```sizeof(fileheader)``` (0x112 or 274 bytes) to header offset. To get next file header, add another ```file->size``` bytes
+ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ``sizeof(fileheader)`` (274 bytes) to header offset. To get next file header, add another ``file->size`` bytes.\
+``name`` and ``link`` are null terminated
 ```
 1st file header -> 1st file contents -> 2nd file header -> 2nd file contents
 ```

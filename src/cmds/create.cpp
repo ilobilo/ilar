@@ -21,9 +21,12 @@ namespace cmds
         std::string name = parent + "/" + path.filename().string();
         std::string contents = filecontents(path);
 
+        size_t name_length = PATH_LENGTH > name.length() ? name.length() : PATH_LENGTH;
+
         fileheader file;
         std::strncpy(file.signature, ILAR_SIGNATURE, 5);
-        std::strncpy(file.name, name.c_str(), PATH_LENGTH);
+        std::strncpy(file.name, name.c_str(), name_length);
+        file.name[name_length] = 0;
 
         file.size = size;
         file.type = ILAR_REGULAR;
@@ -64,9 +67,7 @@ namespace cmds
         archive.write(reinterpret_cast<char*>(&file), sizeof(fileheader));
 
         for (const auto &entry : fs::directory_iterator(path))
-        {
             create(parent + "/" + path.filename().string(), entry, archive);
-        }
     }
 
     void create(std::string parent, fs::path path, std::stringstream &archive)
