@@ -1,17 +1,19 @@
 # ILAR
 Simple archive format
 
-### Supports
+### TODO
 - [x] Regular files
 - [x] Directories
 - [x] Symlinks
 - [x] File modes
-- [x] Create image
-- [x] List files in image
-- [x] Extract files from image
-- [x] GZIP, BZIP2 and LZMA support
+- [x] Create
+- [x] List
+- [x] Extract
+- [x] GZIP
+- [x] BZIP2
+- [x] LZMA
 
-### Dependencies to build
+### Dependencies
 * Meson
 * Ninja
 * C++ compiler
