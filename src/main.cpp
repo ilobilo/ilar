@@ -40,21 +40,22 @@ const auto parser = conflict::parser
     }
 };
 
-void usage()
+void usage(bool err)
 {
-    std::cout << "Usage:\n";
-    std::cout << "    ilar -h/--help\n";
-    std::cout << "    ilar -v/--version\n";
-    std::cout << "    ilar -l/--list -f/--file myimage.ilar\n";
-    std::cout << "    ilar -c/--create -t/--type {gz|bz2|xz} -f/--file myimage.ilar myfile.txt myfile2.txt mydir\n";
-    std::cout << "    ilar -x/--extract -f/--file myimage.ilar -d/--directory outdir\n";
+    auto &out = (err ? std::cerr : std::cout);
+    out << "Usage:\n";
+    out << "    ilar -h/--help\n";
+    out << "    ilar -v/--version\n";
+    out << "    ilar -l/--list -f/--file myimage.ilar\n";
+    out << "    ilar -c/--create -t/--type {gz|bz2|xz} -f/--file myimage.ilar myfile.txt myfile2.txt mydir\n";
+    out << "    ilar -x/--extract -f/--file myimage.ilar -d/--directory outdir\n";
 }
 
 bool parse_flags()
 {
     if (flags & (1 << 0))
     {
-        usage();
+        usage(false);
         std::cout << "\nOptions:\n";
         parser.print_help();
         return true;
@@ -78,7 +79,7 @@ auto main(int argc, char **argv) -> int
 
     if (archive.empty())
     {
-        usage();
+        usage(true);
         return EXIT_FAILURE;
     }
 
@@ -86,7 +87,7 @@ auto main(int argc, char **argv) -> int
     {
         if (files.size() != 0)
         {
-            usage();
+            usage(true);
             return EXIT_FAILURE;
         }
 
@@ -115,7 +116,7 @@ auto main(int argc, char **argv) -> int
     {
         if (files.size() == 0)
         {
-            usage();
+            usage(true);
             return EXIT_FAILURE;
         }
 
@@ -168,7 +169,7 @@ auto main(int argc, char **argv) -> int
     {
         if (files.size() != 0)
         {
-            usage();
+            usage(true);
             return EXIT_FAILURE;
         }
 
@@ -208,7 +209,7 @@ auto main(int argc, char **argv) -> int
     }
     else
     {
-        usage();
+        usage(true);
         return EXIT_FAILURE;
     }
 
