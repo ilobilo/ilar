@@ -44,8 +44,12 @@ Simple archive format
 ```
 
 ### Specifications
-ILAR archive consists of chainloaded file headers and contents. First file header starts at offset 0x00. To get contents of that file, add ``sizeof(fileheader)`` (274 bytes) to header offset. To get next file header, add another ``file->size`` bytes.\
+ILAR archive consists of consecutive file headers and contents.\
+First file starts at offset `0x00`.\
+It's contents is at ``offset + sizeof(fileheader)`` (274 bytes).\
+To get the next file header, add ``sizeof(fileheader) + file->size`` to offset.\
 ``name`` and ``link`` are null terminated
+
 ```
 1st file header -> 1st file contents -> 2nd file header -> 2nd file contents
 ```
@@ -57,11 +61,11 @@ File header structure:
 struct fileheader
 {
     char signature[5]; // Should be ILAR_SIGNATURE
-    char name[PATH_LENGTH]; // File name with full path
+    char name[PATH_LENGTH]; // File name with absolute path
     char link[PATH_LENGTH]; // Contains relative path to symlinked file
     uint64_t size; // Size of file contents in bytes
     uint8_t type; // File type
-    uint32_t mode; // File modes
+    uint32_t mode; // File mode
 } __attribute__((packed));
 ```
 File types:
